@@ -5,6 +5,9 @@ import ServicesSection from "../Components/Service/ServicesSection";
 import LogoMarquee from "./LogoMarquee/LogoMarquee";
 import FeaturesSection from "./FeaturesSection/FeaturesSection";
 import Merchant from "./Merchant/Merchant";
+import CustomersReview from "./CustomersReview/CustomersReview";
+import TestimonialSlider from "./TestimonialSlider/TestimonialSlider";
+import FaqSection from "./FaqSection/FaqSection";
 
 const Home = () => {
   return (
@@ -15,6 +18,9 @@ const Home = () => {
       <LogoMarquee />
       <FeaturesSection />
       <Merchant />
+      <CustomersReview />
+      <TestimonialSlider />
+      <FaqSection />
     </div>
   );
 };

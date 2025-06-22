@@ -8,12 +8,15 @@ import { router } from "./router/routers.jsx";
 
 import "aos/dist/aos.css";
 import Aos from "aos";
+import AuthProvider from "./contexts/AuthContext/Authprovider.jsx";
 Aos.init();
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
     <div className="font-urbanist   bg-gray-100 p-4">
-      <RouterProvider router={router} />
+      <AuthProvider>
+        <RouterProvider router={router} />
+      </AuthProvider>
     </div>
   </StrictMode>
 );
