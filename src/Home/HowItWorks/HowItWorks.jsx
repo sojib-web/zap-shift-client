@@ -33,7 +33,7 @@ const steps = [
 const HowItWorks = () => {
   return (
     <section data-aos="zoom-in" className="py-12 px-4">
-      <div className="max-w-7xl mx-auto">
+      <div className="">
         <h2 className="text-2xl md:text-3xl font-bold text-[#03373D] mb-10">
           How it Works
         </h2>
