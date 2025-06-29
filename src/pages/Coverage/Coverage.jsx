@@ -15,7 +15,7 @@ const Coverage = () => {
   };
 
   return (
-    <div className="bg-white mb-10 rounded-xl shadow p-8 max-w-6xl mx-auto mt-10">
+    <div className="bg-white mb-10 rounded-xl shadow p-8  mt-10">
       <h2 className="text-2xl md:text-3xl font-bold text-[#03373D] mb-4">
         We are available in{" "}
         <span className="text-[#A3D101]">
