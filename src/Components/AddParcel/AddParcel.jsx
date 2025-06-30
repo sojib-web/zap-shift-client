@@ -3,6 +3,7 @@ import { useForm } from "react-hook-form";
 import { useLoaderData } from "react-router";
 import Swal from "sweetalert2";
 import useAuth from "../../hooks/useAuth";
+import useAxiosSecure from "../../hooks/useAxiosSecure";
 
 const AddParcel = () => {
   const {
@@ -13,6 +14,7 @@ const AddParcel = () => {
     formState: { errors },
   } = useForm();
 
+  const axiosSecure = useAxiosSecure();
   const serviceCenters = useLoaderData();
   const { user } = useAuth();
 
@@ -25,7 +27,6 @@ const AddParcel = () => {
   const getDistricts = (region) =>
     serviceCenters.filter((w) => w.region === region).map((w) => w.district);
 
-  // ──────────────── COST CALCULATION ────────────────
   const calculateCost = (data) => {
     const weight = Number(data.weight || 0);
     const outside = data.sender_region !== data.receiver_region;
@@ -42,14 +43,12 @@ const AddParcel = () => {
     return 0;
   };
 
-  // ──────────────── TRACKING ID GENERATOR ────────────────
   const generateTrackingId = () => {
     const randomPart = Math.random().toString(36).substring(2, 8).toUpperCase();
     const timestamp = Date.now().toString().slice(-4);
     return `TRK-${randomPart}${timestamp}`;
   };
 
-  // ──────────────── FORM SUBMIT ────────────────
   const onSubmit = (data) => {
     const cost = calculateCost(data);
     const isOutside = data.sender_region !== data.receiver_region;
@@ -126,24 +125,33 @@ const AddParcel = () => {
       },
     }).then((result) => {
       if (result.isConfirmed) {
-        handleConfirm(parcelData);
-        console.log(parcelData);
+        axiosSecure
+          .post("/parcels", parcelData)
+          .then((response) => {
+            console.log(response.data);
+            if (response.data.insertedId) {
+              Swal.fire(
+                "Success!",
+                `🎉 Parcel info saved successfully. Tracking ID: ${trackingId}`,
+                "success"
+              );
+              reset();
+            } else {
+              Swal.fire("Failed", "Parcel could not be saved.", "error");
+            }
+          })
+          .catch((error) => {
+            console.error(error);
+            Swal.fire(
+              "Error",
+              "Something went wrong. Try again later.",
+              "error"
+            );
+          });
       }
     });
   };
 
-  // ──────────────── SAVE CONFIRMED DATA ────────────────
-  const handleConfirm = (parcelData) => {
-    console.log("✅ Saved Parcel Info:", parcelData);
-    Swal.fire(
-      "Saved!",
-      `🎉 Parcel info saved. Tracking ID: ${parcelData.tracking_id}`,
-      "success"
-    );
-    reset();
-  };
-
-  // ──────────────── FORM JSX ────────────────
   return (
     <div className="mx-auto w-full bg-white p-6 md:p-10 rounded-xl shadow-md my-6">
       <h2 className="text-3xl font-bold mb-2 text-neutral">Add Parcel</h2>

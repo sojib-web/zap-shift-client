@@ -2,17 +2,43 @@
 import React from "react";
 import { useForm } from "react-hook-form";
 import { FcGoogle } from "react-icons/fc";
-import { Link } from "react-router";
+import { Link, useLocation, useNavigate } from "react-router";
+import useAuth from "../../../hooks/useAuth";
 
 const Login = () => {
+  const { signInUser, signInWithGoogle } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const from = location.state?.from || "/";
   const {
     register,
     handleSubmit,
     formState: { errors },
   } = useForm();
 
+  // 🔐 Handle Email/Password Login
   const onSubmit = (data) => {
-    console.log(data);
+    const { email, password } = data;
+    signInUser(email, password)
+      .then((res) => {
+        console.log("Login success:", res.user);
+        navigate(from, { replace: true });
+      })
+      .catch((err) => {
+        console.error("Login error:", err.message);
+      });
+  };
+
+  // 🔐 Handle Google Login
+  const handleGoogleLogin = () => {
+    signInWithGoogle()
+      .then((res) => {
+        console.log("Google login success:", res.user);
+        navigate(from, { replace: true });
+      })
+      .catch((err) => {
+        console.error("Google login error:", err.message);
+      });
   };
 
   return (
@@ -58,12 +84,12 @@ const Login = () => {
         )}
         <div className="text-right mt-1">
           <a href="#" className="text-xs text-blue-500 hover:underline">
-            Forget Password?
+            Forgot Password?
           </a>
         </div>
       </div>
 
-      {/* Submit Button */}
+      {/* Submit */}
       <button
         type="submit"
         className="btn w-full bg-[#A3D101] hover:bg-lime-500 border-none text-black"
@@ -71,7 +97,7 @@ const Login = () => {
         Continue
       </button>
 
-      {/* Register Link */}
+      {/* Register link */}
       <p className="text-sm text-gray-600 text-center">
         Don’t have any account?{" "}
         <Link to="/register" className="text-blue-500 hover:underline">
@@ -79,9 +105,15 @@ const Login = () => {
         </Link>
       </p>
 
-      {/* Google Login */}
+      {/* Divider */}
       <div className="divider text-sm text-gray-400">Or</div>
-      <button className="btn w-full bg-gray-100 hover:bg-gray-200 border border-gray-300 text-sm flex items-center justify-center gap-2">
+
+      {/* Google */}
+      <button
+        type="button"
+        onClick={handleGoogleLogin}
+        className="btn w-full bg-gray-100 hover:bg-gray-200 border border-gray-300 text-sm flex items-center justify-center gap-2"
+      >
         <FcGoogle className="text-lg" /> Login with Google
       </button>
     </form>

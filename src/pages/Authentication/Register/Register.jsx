@@ -1,7 +1,7 @@
 // @ts-nocheck
 import React from "react";
 import { useForm } from "react-hook-form";
-import { Link } from "react-router";
+import { Link, useNavigate } from "react-router";
 import { FcGoogle } from "react-icons/fc";
 import { FaUserCircle } from "react-icons/fa";
 import useAuth from "../../../hooks/useAuth";
@@ -13,20 +13,32 @@ const Register = () => {
     watch,
     formState: { errors },
   } = useForm();
+
   const { createUser, signInWithGoogle } = useAuth();
+  const navigate = useNavigate();
+  const password = watch("password");
 
   const onSubmit = (data) => {
-    console.log(data);
     createUser(data.email, data.password)
       .then((result) => {
-        console.log(result);
+        console.log("User registered:", result.user);
+        navigate("/"); // ✅ Redirect after success
       })
       .catch((error) => {
-        console.log(error);
+        console.error("Registration error:", error.message);
+        // Optionally use toast for UI feedback
       });
   };
 
-  const password = watch("password");
+  const handleGoogleRegister = async () => {
+    try {
+      const result = await signInWithGoogle();
+      console.log("Google register success:", result.user);
+      navigate("/dashboard");
+    } catch (error) {
+      console.error("Google register error:", error.message);
+    }
+  };
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="bg-white space-y-6">
@@ -112,7 +124,7 @@ const Register = () => {
         )}
       </div>
 
-      {/* Submit */}
+      {/* Submit Button */}
       <button
         type="submit"
         className="btn w-full bg-[#A3D101] hover:bg-lime-500 border-none text-black"
@@ -131,7 +143,8 @@ const Register = () => {
       {/* Google Button */}
       <div className="divider text-sm text-gray-400">Or</div>
       <button
-        onClick={signInWithGoogle}
+        type="button"
+        onClick={handleGoogleRegister}
         className="btn w-full bg-gray-100 hover:bg-gray-200 border border-gray-300 text-sm flex items-center justify-center gap-2"
       >
         <FcGoogle className="text-lg" /> Register with Google

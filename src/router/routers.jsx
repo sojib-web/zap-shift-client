@@ -7,26 +7,29 @@ import Register from "../pages/Authentication/Register/Register";
 import Coverage from "../pages/Coverage/Coverage";
 import AddParcel from "../Components/AddParcel/AddParcel";
 import PrivateRoute from "../routes/PrivateRoute";
+import DashboardLayout from "../layouts/DashboardLayout";
+import MyParcel from "../pages/Dashboard/MyParcel/MyParcel";
+import Payment from "../pages/Dashboard/Payments/Payment";
 
 export const router = createBrowserRouter([
   {
     path: "/",
-    Component: RootLayout,
+    element: <RootLayout />,
     children: [
       {
         index: true,
-        Component: Home,
+        element: <Home />,
       },
       {
-        path: "/coverage",
-        Component: Coverage,
+        path: "coverage",
+        element: <Coverage />,
         loader: () => fetch("./warehouses.json"),
       },
       {
-        path: "/pricing",
+        path: "pricing",
         element: (
           <PrivateRoute>
-            <AddParcel></AddParcel>
+            <AddParcel />
           </PrivateRoute>
         ),
         loader: () => fetch("./warehouses.json"),
@@ -35,15 +38,41 @@ export const router = createBrowserRouter([
   },
   {
     path: "/",
-    Component: AuthLayout,
+    element: <AuthLayout />,
     children: [
       {
-        path: "/login",
-        Component: Login,
+        path: "login",
+        element: <Login />,
       },
       {
-        path: "/register",
-        Component: Register,
+        path: "register",
+        element: <Register />,
+      },
+    ],
+  },
+  {
+    path: "/dashboard",
+    element: (
+      <PrivateRoute>
+        <DashboardLayout />
+      </PrivateRoute>
+    ),
+    children: [
+      {
+        index: true,
+        element: <MyParcel />,
+      },
+      {
+        path: "add-parcel",
+        element: <AddParcel />,
+      },
+      {
+        path: "parcels",
+        element: <MyParcel />,
+      },
+      {
+        path: "payment/:id",
+        Component: Payment,
       },
     ],
   },
