@@ -5,19 +5,18 @@ import React, { useState } from "react";
 import { useParams } from "react-router";
 import useAxiosSecure from "../../../hooks/useAxiosSecure";
 import useAuth from "../../../hooks/useAuth";
-import { toast } from "react-hot-toast";
 
 const CheckoutForm = () => {
   const stripe = useStripe();
   const elements = useElements();
+
   const axiosSecure = useAxiosSecure();
-  const { parcelId } = useParams();
   const { user } = useAuth();
+  const { parcelId } = useParams();
 
   const [errorMessage, setErrorMessage] = useState("");
   const [paymentMethodId, setPaymentMethodId] = useState(null);
 
-  // Load parcel info
   const { isPending, data: parcelInfo = {} } = useQuery({
     queryKey: ["parcels", parcelId],
     queryFn: async () => {
@@ -26,10 +25,14 @@ const CheckoutForm = () => {
     },
   });
 
-  if (isPending) return "....loading";
+  if (isPending) {
+    return "....loading";
+  }
 
-  const amount = parcelInfo.cost * 100; // Stripe expects cents
+  console.log(parcelInfo);
 
+  const amount = parcelInfo.cost * 100;
+  console.log(amount);
   const handleSubmit = async (event) => {
     event.preventDefault();
 
@@ -42,7 +45,6 @@ const CheckoutForm = () => {
       return;
     }
 
-    // 1. Create Payment Method (optional)
     const { error, paymentMethod } = await stripe.createPaymentMethod({
       type: "card",
       card,
@@ -51,51 +53,35 @@ const CheckoutForm = () => {
     if (error) {
       setErrorMessage(error.message);
       setPaymentMethodId(null);
-      return;
     } else {
+      console.log("[PaymentMethod]", paymentMethod);
       setPaymentMethodId(paymentMethod.id);
       setErrorMessage("");
-    }
+      const res = await axiosSecure.post("/create-payment-intent", {
+        amount,
+        parcelId,
+      });
 
-    // 2. Get clientSecret from backend
-    const res = await axiosSecure.post("/create-payment-intent", {
-      amount,
-      parcelId,
-    });
+      const clientSecret = res.data.clientSecret;
 
-    const clientSecret = res.data.clientSecret;
-
-    // 3. Confirm card payment
-    const result = await stripe.confirmCardPayment(clientSecret, {
-      payment_method: {
-        card: card,
-        billing_details: {
-          name: user?.displayName || "Unknown",
-          email: user?.email || "demo@example.com",
+      const result = await stripe.confirmCardPayment(clientSecret, {
+        payment_method: {
+          card: elements.getElement(CardElement),
+          billing_details: {
+            name: user?.displayName || "Unknown",
+            email: user?.email || "demo@example.com",
+          },
         },
-      },
-    });
-
-    // 4. Handle result
-    if (result.error) {
-      setErrorMessage(result.error.message);
-      console.log(result.error.message);
-    } else {
-      if (result.paymentIntent.status === "succeeded") {
-        console.log("✅ Payment successful");
-
-        // 5. Save payment info to backend
-        // const paymentData = {
-        //   email: user.email,
-        //   parcelId,
-        //   transactionId: result.paymentIntent.id,
-        //   amount: parcelInfo.cost,
-        //   paymentMethod: "card",
-        // };
-
-        // await axiosSecure.post("/payments", paymentData);
-
-        // toast.success("Payment Successful!");
+      });
+      if (result.error) {
+        setErrorMessage(result.error.message);
+        console.log(result.error.message);
+      } else {
+        setErrorMessage("");
+        if (result.paymentIntent.status === "succeeded") {
+          console.log("Payment successful");
+          console.log(result);
+        }
       }
     }
   };
@@ -114,12 +100,15 @@ const CheckoutForm = () => {
             base: {
               fontSize: "16px",
               color: "#32325d",
+              fontFamily: "sans-serif",
+              fontSmoothing: "antialiased",
               "::placeholder": {
                 color: "#a0aec0",
               },
             },
             invalid: {
               color: "#fa755a",
+              iconColor: "#fa755a",
             },
           },
         }}
@@ -128,14 +117,15 @@ const CheckoutForm = () => {
       <button
         type="submit"
         disabled={!stripe}
-        className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded"
+        className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded transition"
       >
-        Pay ${parcelInfo.cost}
+        Pay $ {amount}
       </button>
 
       {errorMessage && (
         <p className="text-red-500 text-sm text-center">{errorMessage}</p>
       )}
+
       {paymentMethodId && (
         <p className="text-green-600 text-sm text-center">
           ✅ Payment method created: {paymentMethodId}
