@@ -81,6 +81,27 @@ const CheckoutForm = () => {
         if (result.paymentIntent.status === "succeeded") {
           console.log("Payment successful");
           console.log(result);
+          try {
+            const paymentDoc = {
+              email: user.email,
+              parcelId,
+              transactionId: result.paymentIntent.id,
+              amount,
+              paymentMethod: result.paymentIntent.payment_method_types,
+            };
+
+            const paymentRes = await axiosSecure.post("/payments", paymentDoc);
+            if (paymentRes.data.insertedId) {
+              console.log("✅ Payment added to database");
+            } else {
+              console.log("❌ Payment insert failed:", paymentRes.data);
+            }
+          } catch (err) {
+            console.error(
+              "❌ Error saving payment:",
+              err.response?.data || err.message
+            );
+          }
         }
       }
     }
