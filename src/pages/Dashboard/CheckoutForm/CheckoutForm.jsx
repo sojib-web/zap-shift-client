@@ -2,7 +2,8 @@
 import { CardElement, useElements, useStripe } from "@stripe/react-stripe-js";
 import { useQuery } from "@tanstack/react-query";
 import React, { useState } from "react";
-import { useParams } from "react-router";
+import { useParams, useNavigate } from "react-router";
+import Swal from "sweetalert2";
 import useAxiosSecure from "../../../hooks/useAxiosSecure";
 import useAuth from "../../../hooks/useAuth";
 
@@ -12,6 +13,7 @@ const CheckoutForm = () => {
   const axiosSecure = useAxiosSecure();
   const { user } = useAuth();
   const { parcelId } = useParams();
+  const navigate = useNavigate();
 
   const [errorMessage, setErrorMessage] = useState("");
   const [processing, setProcessing] = useState(false);
@@ -40,6 +42,7 @@ const CheckoutForm = () => {
     }
 
     setProcessing(true);
+    setErrorMessage("");
 
     try {
       const { error, paymentMethod } = await stripe.createPaymentMethod({
@@ -84,13 +87,26 @@ const CheckoutForm = () => {
         const paymentRes = await axiosSecure.post("/payments", paymentDoc);
 
         if (paymentRes.data.insertedId) {
-          console.log("✅ Payment recorded in DB");
+          await Swal.fire({
+            icon: "success",
+            title: "Payment Successful",
+            text: "Your payment has been completed and recorded.",
+            confirmButtonColor: "#3085d6",
+            confirmButtonText: "Go to My Parcels",
+          });
+
+          navigate("/dashboard/parcels");
         } else {
-          console.log("❌ Payment DB insert failed");
+          Swal.fire({
+            icon: "error",
+            title: "Payment Saved Failed",
+            text: "Payment succeeded but could not save in database.",
+          });
         }
       }
     } catch (err) {
       console.error("❌ Unexpected error:", err.response?.data || err.message);
+      setErrorMessage("Something went wrong. Please try again.");
     } finally {
       setProcessing(false);
     }

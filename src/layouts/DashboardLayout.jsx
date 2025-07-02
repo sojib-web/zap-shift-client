@@ -1,5 +1,6 @@
 import React from "react";
 import { Link, Outlet } from "react-router";
+import { FaHome, FaBox, FaHistory, FaUserEdit, FaSearch } from "react-icons/fa";
 import ProFastLogo from "../Shared/ProFastLogo/ProFastLogo";
 
 const DashboardLayout = () => {
@@ -43,21 +44,46 @@ const DashboardLayout = () => {
         <label htmlFor="my-drawer-2" className="drawer-overlay"></label>
 
         <div className="flex flex-col w-80 h-full bg-base-200">
-          {/* Fixed Logo Section */}
+          {/* Logo Section */}
           <div className="p-4 border-b border-base-300">
             <ProFastLogo />
           </div>
 
-          {/* Scrollable Menu Section */}
-          <ul className="menu flex-1 overflow-y-auto p-4 text-base-content">
+          {/* Sidebar Menu */}
+          <ul className="menu flex-1 overflow-y-auto p-4 text-base-content space-y-1">
             <li>
-              <Link to="/dashboard">Dashboard Home</Link>
+              <Link to="/dashboard">
+                <FaHome className="mr-2" />
+                Dashboard Home
+              </Link>
             </li>
+
             <li>
-              <Link to="/dashboard/add-parcel">Add Parcel</Link>
+              <Link to="/dashboard/parcels">
+                <FaBox className="mr-2" />
+                My Parcels
+              </Link>
             </li>
+
             <li>
-              <Link to="/dashboard/parcels">My Parcels</Link>
+              <Link to="/dashboard/paymentHistory">
+                <FaHistory className="mr-2" />
+                Payment History
+              </Link>
+            </li>
+
+            <li>
+              <Link to="/dashboard/track">
+                <FaSearch className="mr-2" />
+                Track a Package
+              </Link>
+            </li>
+
+            <li>
+              <Link to="/dashboard/profile">
+                <FaUserEdit className="mr-2" />
+                Update Profile
+              </Link>
             </li>
           </ul>
         </div>
