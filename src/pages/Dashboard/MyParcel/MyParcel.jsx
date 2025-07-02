@@ -25,10 +25,12 @@ const MyParcel = () => {
     },
   });
 
-  // 🟡 Handle Payment with SSLCOMMERZ
-  const handlePayNow = async (id) => {
-    console.log(id);
+  const handlePayNow = (id) => {
     navigate(`/dashboard/payment/${id}`);
+  };
+
+  const handleViewParcel = (id) => {
+    navigate(`/dashboard/parcels/${id}`);
   };
 
   const handleDelete = async (id) => {
@@ -64,72 +66,90 @@ const MyParcel = () => {
         📦 My Parcels ({parcels.length})
       </h2>
 
-      <table className="table table-zebra w-full bg-white shadow-md rounded-md">
-        <thead className="bg-gray-100 text-base">
-          <tr>
-            <th>#</th>
-            <th>Title</th>
-            <th>Tracking ID</th>
-            <th>Status</th>
-            <th>Cost (৳)</th>
-            <th>Created At</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {parcels.map((parcel, index) => (
-            <tr key={parcel._id}>
-              <td>{index + 1}</td>
-              <td>
-                <div className="max-w-[180px] truncate" title={parcel.title}>
-                  {parcel.title}
-                </div>
-              </td>
-              <td className="font-mono">{parcel.tracking_id}</td>
-              <td>
-                <span
-                  className={`badge px-3 py-1 text-white ${
-                    parcel.delivery_status === "pending"
-                      ? "bg-yellow-500"
-                      : parcel.delivery_status === "delivered"
-                      ? "bg-green-600"
-                      : "bg-gray-500"
-                  }`}
-                >
-                  {parcel.delivery_status}
-                </span>
-              </td>
-              <td>৳{parcel.cost}</td>
-              <td>
-                {moment(parcel.creation_date).format("DD MMM YYYY, h:mm A")}
-              </td>
-              <td className="flex gap-2 flex-wrap">
-                <Link
-                  to={`/dashboard/parcels/${parcel._id}`}
-                  className="btn btn-sm btn-info text-white"
-                >
-                  View
-                </Link>
-                <Link
-                  onClick={() => handlePayNow(parcel._id)}
-                  className="btn btn-sm text-black"
-                  style={{
-                    backgroundColor: "rgb(202, 235, 102)",
-                  }}
-                >
-                  Pay Now
-                </Link>
-                <button
-                  onClick={() => handleDelete(parcel._id)}
-                  className="btn btn-sm btn-error text-white"
-                >
-                  Delete
-                </button>
-              </td>
+      <div className="overflow-auto rounded-md shadow">
+        <table className="table w-full bg-white">
+          <thead className="bg-gray-100 text-sm text-gray-600">
+            <tr>
+              <th>#</th>
+              <th>Title</th>
+              <th>Tracking ID</th>
+              <th>Status</th>
+              <th>Cost (৳)</th>
+              <th>Created At</th>
+              <th className="text-center">Actions</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {parcels.map((parcel, index) => (
+              <tr key={parcel._id} className="hover:bg-gray-50">
+                <td>{index + 1}</td>
+                <td>
+                  <div
+                    className="max-w-[180px] truncate font-medium"
+                    title={parcel.title}
+                  >
+                    {parcel.title}
+                  </div>
+                </td>
+                <td className="font-mono text-sm">{parcel.tracking_id}</td>
+                <td>
+                  <span
+                    className={`badge px-3 py-1 text-white capitalize ${
+                      parcel.delivery_status === "pending"
+                        ? "bg-yellow-500"
+                        : parcel.delivery_status === "delivered"
+                        ? "bg-green-600"
+                        : "bg-gray-500"
+                    }`}
+                  >
+                    {parcel.delivery_status}
+                  </span>
+                </td>
+                <td>৳{parcel.cost}</td>
+                <td>
+                  {moment(parcel.creation_date).format("DD MMM YYYY, h:mm A")}
+                </td>
+                <td>
+                  <div className="flex gap-2 flex-wrap justify-center">
+                    <button
+                      onClick={() => handleViewParcel(parcel._id)}
+                      className="btn btn-sm btn-info text-white"
+                    >
+                      View
+                    </button>
+
+                    {parcel.payment_status === "unpaid" ? (
+                      <button
+                        onClick={() => handlePayNow(parcel._id)}
+                        className="btn btn-sm text-black"
+                        style={{ backgroundColor: "rgb(202, 235, 102)" }}
+                      >
+                        Pay Now
+                      </button>
+                    ) : (
+                      <div className="tooltip" data-tip="Already paid">
+                        <button
+                          disabled
+                          className="btn btn-sm bg-green-500 text-white cursor-not-allowed"
+                        >
+                          Paid
+                        </button>
+                      </div>
+                    )}
+
+                    <button
+                      onClick={() => handleDelete(parcel._id)}
+                      className="btn btn-sm btn-error text-white"
+                    >
+                      Delete
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 };
