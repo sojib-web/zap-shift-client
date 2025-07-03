@@ -1,37 +1,41 @@
 // @ts-nocheck
 import { useQuery } from "@tanstack/react-query";
-import React from "react";
+import React, { useState } from "react";
 import useAuth from "../../../hooks/useAuth";
 import useAxiosSecure from "../../../hooks/useAxiosSecure";
 import moment from "moment";
-import { Link, useNavigate } from "react-router";
+import { useNavigate } from "react-router";
 import Swal from "sweetalert2";
+
+const ITEMS_PER_PAGE = 10;
 
 const MyParcel = () => {
   const { user } = useAuth();
   const axiosSecure = useAxiosSecure();
   const navigate = useNavigate();
+  const [currentPage, setCurrentPage] = useState(1);
 
   const {
-    data: parcels = [],
+    data = { parcels: [], total: 0 },
     isLoading,
     refetch,
   } = useQuery({
-    queryKey: ["my-parcel", user?.email],
+    queryKey: ["my-parcel", user?.email, currentPage],
     enabled: !!user?.email,
     queryFn: async () => {
-      const response = await axiosSecure.get(`/parcels?email=${user.email}`);
-      return response.data;
+      const res = await axiosSecure.get("/parcels", {
+        params: {
+          email: user.email,
+          page: currentPage,
+          limit: ITEMS_PER_PAGE,
+        },
+      });
+      return res.data;
     },
   });
 
-  const handlePayNow = (id) => {
-    navigate(`/dashboard/payment/${id}`);
-  };
-
-  const handleViewParcel = (id) => {
-    navigate(`/dashboard/parcels/${id}`);
-  };
+  const handlePayNow = (id) => navigate(`/dashboard/payment/${id}`);
+  const handleViewParcel = (id) => navigate(`/dashboard/parcels/${id}`);
 
   const handleDelete = async (id) => {
     const result = await Swal.fire({
@@ -58,12 +62,14 @@ const MyParcel = () => {
     }
   };
 
+  const totalPages = Math.ceil(data.total / ITEMS_PER_PAGE);
+
   if (isLoading) return <p className="text-center py-10">Loading...</p>;
 
   return (
     <div className="overflow-x-auto p-4">
       <h2 className="text-2xl font-semibold mb-4">
-        📦 My Parcels ({parcels.length})
+        📦 My Parcels ({data.total})
       </h2>
 
       <div className="overflow-auto rounded-md shadow">
@@ -80,9 +86,9 @@ const MyParcel = () => {
             </tr>
           </thead>
           <tbody>
-            {parcels.map((parcel, index) => (
+            {data.parcels.map((parcel, index) => (
               <tr key={parcel._id} className="hover:bg-gray-50">
-                <td>{index + 1}</td>
+                <td>{(currentPage - 1) * ITEMS_PER_PAGE + index + 1}</td>
                 <td>
                   <div
                     className="max-w-[180px] truncate font-medium"
@@ -124,7 +130,7 @@ const MyParcel = () => {
                         className="btn btn-sm text-black"
                         style={{ backgroundColor: "rgb(202, 235, 102)" }}
                       >
-                        Pay Now
+                        Pay
                       </button>
                     ) : (
                       <div className="tooltip" data-tip="Already paid">
@@ -150,6 +156,29 @@ const MyParcel = () => {
           </tbody>
         </table>
       </div>
+
+      {/* Pagination Controls */}
+      {totalPages > 1 && (
+        <div className="flex justify-center mt-6 gap-2">
+          <button
+            className="btn btn-sm"
+            disabled={currentPage === 1}
+            onClick={() => setCurrentPage(currentPage - 1)}
+          >
+            ⬅ Prev
+          </button>
+          <span className="px-4 py-2 rounded bg-gray-100 text-sm">
+            Page {currentPage} of {totalPages}
+          </span>
+          <button
+            className="btn btn-sm"
+            disabled={currentPage === totalPages}
+            onClick={() => setCurrentPage(currentPage + 1)}
+          >
+            Next ➡
+          </button>
+        </div>
+      )}
     </div>
   );
 };
