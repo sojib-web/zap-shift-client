@@ -5,8 +5,9 @@ import { Link, useNavigate } from "react-router";
 import { FcGoogle } from "react-icons/fc";
 import useAuth from "../../../hooks/useAuth";
 import axios from "axios";
-import useAxiosSecure from "../../../hooks/useAxiosSecure";
+
 import { auth } from "../../../firebase/firebase_init";
+import useAxios from "../../../hooks/useAxios";
 
 const Register = () => {
   const {
@@ -18,7 +19,8 @@ const Register = () => {
 
   const { createUser, signInWithGoogle, updateUserProfile } = useAuth();
   const navigate = useNavigate();
-  const axiosSecure = useAxiosSecure();
+
+  const axiosInstance = useAxios();
   const password = watch("password");
   const [imageUrl, setImageUrl] = useState("");
   const [isUploading, setIsUploading] = useState(false);
@@ -51,7 +53,7 @@ const Register = () => {
     }
   };
 
-  // Handle registration
+  // Handle email/password registration
   const onSubmit = async (data) => {
     if (!imageUrl) {
       console.log("Please upload a profile image");
@@ -67,21 +69,35 @@ const Register = () => {
         name: data.name,
         email: data.email,
         photo: imageUrl,
-        createdAt: new Date(),
+        role: "user",
+        createdAt: new Date().toISOString(),
+        last_log_in: new Date().toISOString(),
       };
 
-      await axiosSecure.post("/api/users", userData);
+      await axiosInstance.post("/users", userData);
       navigate("/");
     } catch (error) {
       console.error("Registration error:", error.message);
     }
   };
 
-  // Google sign-in
+  // Google register
   const handleGoogleRegister = async () => {
     try {
-      await signInWithGoogle();
-      navigate("/dashboard");
+      const result = await signInWithGoogle();
+      const user = result.user;
+
+      const userData = {
+        name: user.displayName,
+        email: user.email,
+        photo: user.photoURL,
+        role: "user",
+        createdAt: new Date().toISOString(),
+        last_log_in: new Date().toISOString(),
+      };
+
+      await axiosInstance.post("/users", userData);
+      navigate("/");
     } catch (error) {
       console.error("Google register error:", error.message);
     }
