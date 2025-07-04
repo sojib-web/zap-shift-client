@@ -13,6 +13,9 @@ import Payment from "../pages/Dashboard/Payments/Payment";
 import ViewParcel from "../pages/Dashboard/ViewParcel/ViewParcel";
 import PaymentHistory from "../pages/Dashboard/PaymentHistory/PaymentHistory";
 import TrackParcel from "../pages/Dashboard/TrackParcel/TrackParcel";
+import RiderApplication from "../pages/Dashboard/RiderApplication/RiderApplication";
+import PendingRiders from "../pages/Dashboard/PendingRiders/PendingRiders";
+import ActiveRiders from "../pages/Dashboard/ActiveRiders/ActiveRiders";
 
 export const router = createBrowserRouter([
   {
@@ -33,6 +36,15 @@ export const router = createBrowserRouter([
         element: (
           <PrivateRoute>
             <AddParcel />
+          </PrivateRoute>
+        ),
+        loader: () => fetch("./warehouses.json"),
+      },
+      {
+        path: "rider",
+        element: (
+          <PrivateRoute>
+            <RiderApplication />
           </PrivateRoute>
         ),
         loader: () => fetch("./warehouses.json"),
@@ -88,6 +100,14 @@ export const router = createBrowserRouter([
       {
         path: "track",
         Component: TrackParcel,
+      },
+      {
+        path: "pending-riders",
+        Component: PendingRiders,
+      },
+      {
+        path: "active-riders",
+        Component: ActiveRiders,
       },
     ],
   },

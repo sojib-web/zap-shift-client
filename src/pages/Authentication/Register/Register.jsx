@@ -25,6 +25,9 @@ const Register = () => {
   const [imageUrl, setImageUrl] = useState("");
   const [isUploading, setIsUploading] = useState(false);
 
+  const user = auth.currentUser;
+  console.log("🔍 Firebase UserImpl Object:", user);
+
   // Upload image to Cloudinary
   const handleImageUpload = async (e) => {
     const file = e.target.files[0];

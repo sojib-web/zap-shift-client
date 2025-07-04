@@ -1,6 +1,14 @@
 import React from "react";
 import { Link, Outlet } from "react-router";
-import { FaHome, FaBox, FaHistory, FaUserEdit, FaSearch } from "react-icons/fa";
+import {
+  FaHome,
+  FaBox,
+  FaHistory,
+  FaCheckCircle,
+  FaHourglassHalf,
+  FaUserEdit,
+  FaSearch,
+} from "react-icons/fa";
 import ProFastLogo from "../Shared/ProFastLogo/ProFastLogo";
 
 const DashboardLayout = () => {
@@ -76,6 +84,18 @@ const DashboardLayout = () => {
               <Link to="/dashboard/track">
                 <FaSearch className="mr-2" />
                 Track a Package
+              </Link>
+            </li>
+            <li>
+              <Link to="/dashboard/active-riders">
+                <FaCheckCircle className="mr-2" />
+                Active Riders
+              </Link>
+            </li>
+            <li>
+              <Link to="/dashboard/pending-riders">
+                <FaHourglassHalf className="mr-2" />
+                Pending Riders
               </Link>
             </li>
 

@@ -5,7 +5,7 @@ import Footer from "../Shared/Footer/Footer";
 
 const RootLayout = () => {
   return (
-    <div className=" max-w-[1440px] mx-auto px-4">
+    <div className=" bg-green-100">
       <Navbar></Navbar>
       <Outlet></Outlet>
       <Footer></Footer>

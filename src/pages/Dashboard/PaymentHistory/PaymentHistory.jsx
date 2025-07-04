@@ -3,9 +3,9 @@ import useAuth from "../../../hooks/useAuth";
 import { useQuery } from "@tanstack/react-query";
 import useAxiosSecure from "../../../hooks/useAxiosSecure";
 import moment from "moment";
-import { FaRegCopy } from "react-icons/fa";
+import { FaRegCopy, FaMoneyCheckAlt } from "react-icons/fa";
 
-const LIMIT = 10; // Number of rows per page
+const LIMIT = 10;
 
 const PaymentHistory = () => {
   const { user } = useAuth();
@@ -35,47 +35,62 @@ const PaymentHistory = () => {
     setTimeout(() => setCopiedId(null), 1500);
   };
 
-  if (isPending) return <p className="text-center mt-10">Loading...</p>;
+  if (isPending) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <span className="loading loading-spinner text-green-600 text-2xl"></span>
+      </div>
+    );
+  }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-8">
-      <h2 className="text-3xl font-bold text-center mb-6">
-        💳 Payment History
-      </h2>
+    <div className="p-6 md:p-10">
+      <div className="mb-6 flex items-center gap-3">
+        <FaMoneyCheckAlt className="text-3xl text-green-700" />
+        <h2 className="text-3xl font-bold text-green-800">Payment History</h2>
+      </div>
 
       {payments.length === 0 ? (
-        <p className="text-center text-gray-500">No payment history found.</p>
+        <p className="text-gray-500 bg-white p-6 rounded-lg shadow-sm">
+          No payment history found.
+        </p>
       ) : (
-        <>
-          <div className="overflow-x-auto shadow-xl rounded-xl border border-base-300">
-            <table className="table table-zebra w-full text-xs sm:text-sm">
-              <thead className="bg-base-200 text-base-content uppercase font-semibold">
+        <div className="w-full rounded-xl shadow-xl border border-green-100 bg-white overflow-hidden">
+          <div className="overflow-auto">
+            <table className="min-w-full text-sm text-left">
+              <thead className="bg-green-600 text-white uppercase text-xs">
                 <tr>
-                  <th>#</th>
-                  <th>Parcel ID</th>
-                  <th>Email</th>
-                  <th>Transaction ID</th>
-                  <th>Amount</th>
-                  <th>Method</th>
-                  <th>Paid At</th>
+                  <th className="px-4 py-3">#</th>
+                  <th className="px-4 py-3">Parcel ID</th>
+                  <th className="px-4 py-3">Email</th>
+                  <th className="px-4 py-3">Transaction ID</th>
+                  <th className="px-4 py-3">Amount</th>
+                  <th className="px-4 py-3">Method</th>
+                  <th className="px-4 py-3">Paid At</th>
                 </tr>
               </thead>
               <tbody>
                 {payments.map((payment, index) => (
                   <tr
                     key={payment._id}
-                    className="hover:bg-base-100 transition-all"
+                    className="odd:bg-green-50 even:bg-white hover:bg-green-100"
                   >
-                    <td>{(page - 1) * LIMIT + index + 1}</td>
-                    <td className="whitespace-nowrap">{payment.parcelId}</td>
-                    <td className="whitespace-nowrap">{payment.email}</td>
-                    <td>
+                    <td className="px-4 py-3">
+                      {(page - 1) * LIMIT + index + 1}
+                    </td>
+                    <td className="px-4 py-3 font-medium whitespace-nowrap">
+                      {payment.parcelId}
+                    </td>
+                    <td className="px-4 py-3 max-w-[180px] truncate">
+                      {payment.email}
+                    </td>
+                    <td className="px-4 py-3">
                       <div className="flex items-center gap-2">
                         <div
                           className="tooltip tooltip-top"
                           data-tip={payment.transactionId}
                         >
-                          <span className="truncate max-w-[120px] inline-block cursor-help whitespace-nowrap">
+                          <span className="truncate max-w-[130px] inline-block cursor-pointer">
                             {payment.transactionId}
                           </span>
                         </div>
@@ -96,16 +111,18 @@ const PaymentHistory = () => {
                         </div>
                       </div>
                     </td>
-                    <td className="font-semibold text-green-600">
+                    <td className="px-4 py-3 font-semibold text-green-600">
                       ${(payment.amount / 100).toFixed(2)}
                     </td>
-                    <td className="capitalize">{payment.paymentMethod?.[0]}</td>
-                    <td>
+                    <td className="px-4 py-3 capitalize">
+                      {payment.paymentMethod?.[0]}
+                    </td>
+                    <td className="px-4 py-3 text-gray-600">
                       {moment(
                         payment.paid_at ||
                           payment.paid_at_string ||
                           payment.createdAt
-                      ).format("LLL")}
+                      ).format("YYYY-MM-DD hh:mm A")}
                     </td>
                   </tr>
                 ))}
@@ -113,40 +130,37 @@ const PaymentHistory = () => {
             </table>
           </div>
 
-          {/* Pagination Controls */}
-          {/* Stylish Pagination Controls */}
-          <div className="flex items-center justify-center mt-6 gap-4 flex-wrap">
+          {/* Pagination */}
+          <div className="flex justify-center mt-6 gap-4 flex-wrap px-4 pb-6">
             <button
               onClick={() => setPage((p) => Math.max(p - 1, 1))}
               disabled={page === 1}
-              className={`px-4 py-2 rounded-lg border text-sm font-medium transition-all duration-200
-      ${
-        page === 1
-          ? "bg-gray-200 text-gray-500 cursor-not-allowed"
-          : "bg-base-100 hover:bg-base-200 border-base-300 text-base-content"
-      }`}
+              className={`px-4 py-2 rounded-md border text-sm font-medium transition-all ${
+                page === 1
+                  ? "bg-gray-200 text-gray-400 cursor-not-allowed"
+                  : "bg-base-100 hover:bg-base-200 border-base-300 text-base-content"
+              }`}
             >
               ⬅ Previous
             </button>
 
-            <span className="px-4 py-2 rounded-lg bg-base-200 text-base-content text-sm font-semibold shadow-sm">
+            <span className="px-4 py-2 bg-base-200 rounded-md text-base-content font-medium shadow">
               Page {page} of {totalPages}
             </span>
 
             <button
               onClick={() => setPage((p) => Math.min(p + 1, totalPages))}
               disabled={page === totalPages}
-              className={`px-4 py-2 rounded-lg border text-sm font-medium transition-all duration-200
-      ${
-        page === totalPages
-          ? "bg-gray-200 text-gray-500 cursor-not-allowed"
-          : "bg-base-100 hover:bg-base-200 border-base-300 text-base-content"
-      }`}
+              className={`px-4 py-2 rounded-md border text-sm font-medium transition-all ${
+                page === totalPages
+                  ? "bg-gray-200 text-gray-400 cursor-not-allowed"
+                  : "bg-base-100 hover:bg-base-200 border-base-300 text-base-content"
+              }`}
             >
               Next ➡
             </button>
           </div>
-        </>
+        </div>
       )}
     </div>
   );
