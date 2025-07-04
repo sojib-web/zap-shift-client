@@ -53,13 +53,10 @@ const ActiveRiders = () => {
     }
   };
 
-  const filteredRiders = approvedRiders.filter(
-    (rider) =>
-      rider.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      rider.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      rider.phone.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      rider.region.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      rider.district.toLowerCase().includes(searchQuery.toLowerCase())
+  const filteredRiders = approvedRiders.filter((rider) =>
+    [rider.name, rider.email, rider.phone, rider.region, rider.district].some(
+      (field) => field?.toLowerCase().includes(searchQuery.toLowerCase())
+    )
   );
 
   if (isLoading) {
@@ -138,21 +135,15 @@ const ActiveRiders = () => {
                     <td className="px-4 py-3 max-w-[120px] truncate">
                       {rider.nid}
                     </td>
-                    <td className="px-4 py-3">{rider.bike_brand}</td>
+                    <td className="px-4 py-3">{rider.bikeBrand}</td>
                     <td className="px-4 py-3 max-w-[120px] truncate">
-                      {rider.bike_reg_number}
+                      {rider.bikeNumber}
                     </td>
                     <td className="px-4 py-3 text-gray-600">
                       {moment(rider.createdAt).format("YYYY-MM-DD hh:mm A")}
                     </td>
                     <td className="px-4 py-3">
-                      <span
-                        className={`px-2 py-1 rounded-full text-xs font-semibold ${
-                          rider.status === "active"
-                            ? "bg-green-100 text-green-800"
-                            : "bg-red-100 text-red-800"
-                        }`}
-                      >
+                      <span className="px-2 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-800">
                         {rider.status}
                       </span>
                     </td>

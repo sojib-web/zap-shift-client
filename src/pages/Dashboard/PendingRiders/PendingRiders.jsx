@@ -3,8 +3,8 @@ import { useQuery } from "@tanstack/react-query";
 import moment from "moment";
 import toast from "react-hot-toast";
 import Swal from "sweetalert2";
-import useAxiosSecure from "../../../hooks/useAxiosSecure";
 import { FaUserClock } from "react-icons/fa";
+import useAxiosSecure from "../../../hooks/useAxiosSecure";
 
 const PendingRiders = () => {
   const axiosSecure = useAxiosSecure();
@@ -19,32 +19,35 @@ const PendingRiders = () => {
     queryFn: () => axiosSecure.get("/riders/pending").then((res) => res.data),
   });
 
-  const handleAction = async (type, id) => {
-    const result = await Swal.fire({
-      title: `Are you sure?`,
-      text: `You want to ${type} this rider?`,
+  const handleAction = async (type, id, email) => {
+    const confirm = await Swal.fire({
+      title: type === "approve" ? "Approve Rider?" : "Reject Rider?",
+      text: `Are you sure you want to ${type} this rider?`,
       icon: type === "approve" ? "success" : "warning",
       showCancelButton: true,
-      confirmButtonColor: type === "approve" ? "#10b981" : "#ef4444",
-      cancelButtonColor: "#6b7280",
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
       confirmButtonText: `Yes, ${type}`,
     });
 
-    if (!result.isConfirmed) return;
+    if (confirm.isConfirmed) {
+      try {
+        if (type === "approve") {
+          await axiosSecure.patch(`/riders/status/${id}`, {
+            status: "active",
+            email,
+          });
+          toast.success("Rider approved");
+        } else {
+          await axiosSecure.delete(`/riders/${id}`);
+          toast.success("Rider rejected and deleted");
+        }
 
-    try {
-      setLoading(true);
-      if (type === "approve") {
-        await axiosSecure.patch(`/riders/approve/${id}`);
-      } else {
-        await axiosSecure.delete(`/riders/${id}`);
+        refetch();
+      } catch (error) {
+        console.error(error);
+        toast.error("An error occurred");
       }
-      toast.success(`Rider ${type}d`);
-      refetch();
-    } catch {
-      toast.error(`Failed to ${type} rider`);
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -120,9 +123,6 @@ const PendingRiders = () => {
                           `,
                           showCloseButton: true,
                           confirmButtonText: "Close",
-                          customClass: {
-                            popup: "text-left",
-                          },
                         });
                       }}
                     >
@@ -130,14 +130,14 @@ const PendingRiders = () => {
                     </button>
                     <button
                       className="btn btn-xs btn-outline btn-success"
-                      onClick={() => handleAction("approve", r._id)}
+                      onClick={() => handleAction("approve", r._id, r.email)}
                       disabled={loading}
                     >
                       Approve
                     </button>
                     <button
                       className="btn btn-xs btn-outline btn-error"
-                      onClick={() => handleAction("reject", r._id)}
+                      onClick={() => handleAction("reject", r._id, r.email)}
                       disabled={loading}
                     >
                       Reject
