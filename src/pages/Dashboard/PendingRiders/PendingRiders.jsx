@@ -32,6 +32,7 @@ const PendingRiders = () => {
 
     if (confirm.isConfirmed) {
       try {
+        setLoading(true);
         if (type === "approve") {
           await axiosSecure.patch(`/riders/status/${id}`, {
             status: "active",
@@ -47,6 +48,8 @@ const PendingRiders = () => {
       } catch (error) {
         console.error(error);
         toast.error("An error occurred");
+      } finally {
+        setLoading(false);
       }
     }
   };
@@ -130,14 +133,14 @@ const PendingRiders = () => {
                     </button>
                     <button
                       className="btn btn-xs btn-outline btn-success"
-                      onClick={() => handleAction("approve", r._id, r.email)}
+                      onClick={() => handleAction("approve", r._id, r.email)} // ✅ fixed
                       disabled={loading}
                     >
                       Approve
                     </button>
                     <button
                       className="btn btn-xs btn-outline btn-error"
-                      onClick={() => handleAction("reject", r._id, r.email)}
+                      onClick={() => handleAction("reject", r._id)}
                       disabled={loading}
                     >
                       Reject
