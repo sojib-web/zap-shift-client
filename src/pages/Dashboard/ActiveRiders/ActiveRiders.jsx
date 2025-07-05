@@ -40,9 +40,10 @@ const ActiveRiders = () => {
         const res = await axiosSecure.patch(`/riders/status/${riderId}`, {
           status: "inactive",
         });
+
         if (res.data.modifiedCount > 0) {
           toast.success("Rider deactivated successfully");
-          refetch();
+          refetch(); // ✅ refreshes the rider list
         } else {
           toast.error("Failed to update status");
         }
@@ -94,7 +95,7 @@ const ActiveRiders = () => {
 
       {filteredRiders.length === 0 ? (
         <p className="text-gray-500 bg-white p-6 rounded-lg shadow-sm">
-          No approved riders found.
+          No active riders found.
         </p>
       ) : (
         <div className="w-full rounded-xl shadow-xl border border-green-100 bg-white overflow-hidden">
